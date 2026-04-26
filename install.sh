@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==============================================================================
-# PROJETO ACRÓPOLE - INSTALADOR INTERATIVO E PAINEL WEB (ESTÁGIO FINAL)
+# PROJETO ACRÓPOLE - INSTALADOR INTERATIVO E PAINEL WEB (ESTÁGIO FINAL), é foi gerado por IA.
 # ==============================================================================
 
 clear
@@ -14,7 +14,7 @@ echo "---------------------------------------------------------"
 
 # PERGUNTA 1: Ignição
 echo "[PERGUNTA 1] Como você prefere ligar a sua Acrópole?"
-echo "  [1] Botão Único (Um comando liga todos os serviços juntos, Recomendado.) " 
+echo "  [1] Botão Único (Um comando liga todos os serviços juntos, Recomendado) " 
 echo "  [2] Manual (Ligar Radarr, Prowlarr e Bazarr separadamente)"
 read -p "Escolha uma opção [1 ou 2]: " OPCAO_IGNICAO
 
@@ -34,6 +34,12 @@ sleep 3
 
 termux-wake-lock
 
+echo "[0/4] Solicitando permissão de armazenamento do celular..."
+echo "      (Por favor, clique em 'Permitir' na tela do seu celular)"
+termux-setup-storage
+sleep 5
+mkdir -p /storage/emulated/0/Movies/Acropole_Filmes
+
 echo "[1/4] Atualizando os alicerces do Termux..."
 pkg update -y && pkg upgrade -y > /dev/null 2>&1
 
@@ -48,7 +54,7 @@ echo "[4/4] Injetando a forja de aplicativos no núcleo..."
 cat << 'EOF' > $PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/root/setup_interno.sh
 #!/bin/bash
 apt update && apt upgrade -y > /dev/null 2>&1
-apt install -y curl sqlite3 libicu-dev python3 python3-pip wget unzip tar > /dev/null 2>&1
+apt install -y curl sqlite3 libicu-dev python3 python3-pip wget unzip tar transmission-daemon > /dev/null 2>&1
 
 mkdir -p /opt
 
@@ -85,6 +91,7 @@ cat << 'HTML' > /opt/Painel/index.html
         .radarr { background-color: #ffc107; color: #333; }
         .prowlarr { background-color: #f44336; }
         .bazarr { background-color: #4caf50; }
+        .transmission { background-color: #1976d2; }
         .btn:hover { opacity: 0.8; transform: scale(1.05); }
         .footer { margin-top: 50px; font-size: 0.8rem; color: #533483; }
     </style>
@@ -94,6 +101,7 @@ cat << 'HTML' > /opt/Painel/index.html
     <a href="http://localhost:7878" class="btn radarr" target="_blank">🎬 Abrir Radarr (Filmes)</a>
     <a href="http://localhost:9696" class="btn prowlarr" target="_blank">🔍 Abrir Prowlarr (Busca)</a>
     <a href="http://localhost:6767" class="btn bazarr" target="_blank">📝 Abrir Bazarr (Legendas)</a>
+    <a href="http://localhost:9091" class="btn transmission" target="_blank">⬇️ Abrir Transmission (Downloads)</a>
     <div class="footer">Sistema Operacional S9 Linux</div>
 </body>
 </html>
@@ -108,6 +116,10 @@ export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 nohup /opt/Radarr/Radarr -nobrowser > /root/radarr.log 2>&1 &
 nohup /opt/Prowlarr/Prowlarr -nobrowser > /root/prowlarr.log 2>&1 &
 nohup python3 /opt/Bazarr/bazarr.py > /root/bazarr.log 2>&1 &
+
+# Inicia o Transmission apontando a pasta de downloads para o armazenamento do Android, desativando senha local
+mkdir -p /storage/emulated/0/Movies/Acropole_Filmes/Downloads
+nohup transmission-daemon -f -T -w /storage/emulated/0/Movies/Acropole_Filmes/Downloads > /root/transmission.log 2>&1 &
 
 # Liga o Painel de Controle na porta 8080
 cd /opt/Painel && nohup python3 -m http.server 8080 > /root/painel.log 2>&1 &
@@ -158,27 +170,140 @@ else
 fi
 
 # ==============================================================================
-# CONCLUSÃO E INSTRUÇÕES FINAIS (O TELA FINAL DO AMIGO)
+# CONCLUSÃO E GUIA DE CONFIGURAÇÃO PASSO A PASSO (TUTORIAL NO TERMINAL)
 # ==============================================================================
 
 clear
-echo "========================================================="
-echo " 🏛️ A SUA ACRÓPOLE ESTÁ PRONTA!"
-echo "========================================================="
-echo ""
+cat << 'GUIA_INICIO'
+=========================================================
+ 🏛️ A SUA ACRÓPOLE ESTÁ VIVA E ONLINE!
+=========================================================
+GUIA_INICIO
 echo " 1. $MENSAGEM_IGNICAO"
-echo ""
 echo " 2. $MENSAGEM_AUTOMACAO"
-echo ""
-echo " -------------------------------------------------------"
-echo " 🌐 COMO ACESSAR SEUS SITES FACILMENTE (ATALHO):"
-echo " -------------------------------------------------------"
-echo " Após ligar a Acrópole com o comando acima, abra o"
-echo " seu navegador Chrome no celular e digite este endereço:"
-echo ""
-echo "             http://localhost:8080"
-echo ""
-echo " Para não precisar digitar isso nunca mais:"
-echo " Clique nos 3 pontinhos do Chrome e escolha a opção:"
-echo " 'Adicionar à Tela Inicial'."
-echo "========================================================="
+cat << 'GUIA_INICIO2'
+
+ 🌐 ACESSO RÁPIDO AOS APLICATIVOS (O SEU PAINEL):
+ Abra o navegador Chrome no celular e acesse:
+ 👉 http://localhost:8080
+ (Dica: Adicione esta página à tela inicial do celular!)
+=========================================================
+
+O sistema pesado foi instalado! Agora, precisamos apenas
+conectar os "fios" entre os aplicativos.
+Siga este guia com atenção (você só fará isso uma vez).
+
+GUIA_INICIO2
+read -p "👉 Pressione [ENTER] para iniciar a FASE 1..."
+clear
+
+cat << 'FASE1'
+=========================================================
+ 🎬 FASE 1: O Cinema (Plex)
+=========================================================
+O Plex é a sua "Netflix" particular. É por onde vai ver.
+
+1. Abra a Play Store e baixe o aplicativo "Plex".
+2. Crie uma conta gratuita (ou faça login).
+3. Vá em adicionar uma "Biblioteca" (Library) de Filmes.
+4. Quando pedir a pasta onde os filmes estão, escolha
+   EXATAMENTE este caminho no seu armazenamento interno:
+
+   👉 /storage/emulated/0/Movies/Acropole_Filmes
+
+5. Salve. O Plex vai vigiar esta pasta para sempre.
+=========================================================
+FASE1
+read -p "👉 Pressione [ENTER] quando terminar a FASE 1..."
+clear
+
+cat << 'FASE2'
+=========================================================
+ 🔍 FASE 2: O Motor de Busca (Prowlarr)
+=========================================================
+É ele quem vai procurar os filmes na internet.
+
+1. No seu Painel Web (localhost:8080), clique no botão
+   "Abrir Prowlarr".
+2. No menu lateral, vá em "Indexers" e clique no "+".
+3. Adicione os sites de onde quer baixar os filmes.
+   (Recomendados: YTS, TorrentGalaxy, 1337x)
+4. Clique em "Save" para cada um deles.
+=========================================================
+FASE2
+read -p "👉 Pressione [ENTER] quando terminar a FASE 2..."
+clear
+
+cat << 'FASE3'
+=========================================================
+ 🧠 FASE 3: O Cérebro (Radarr) & O Baixador (Transmission)
+=========================================================
+O Radarr recebe o pedido e manda o Transmission baixar.
+
+1. No Painel Web, clique em "Abrir Radarr".
+2. Vá em Settings > Media Management.
+   - Marque "Show Advanced" lá no topo.
+   - Desça até "Root Folders" e adicione o nosso caminho:
+     👉 /storage/emulated/0/Movies/Acropole_Filmes
+   - Salve.
+3. Vá em Settings > Download Clients.
+4. Clique no "+" e escolha "Transmission". Preencha:
+   - Name: Transmission Local
+   - Host: localhost
+   - Port: 9091
+   - Username/Password: (DEIXE TUDO EM BRANCO)
+5. Clique em "Test". Se der check verde, clique "Save".
+=========================================================
+FASE3
+read -p "👉 Pressione [ENTER] quando terminar a FASE 3..."
+clear
+
+cat << 'FASE4'
+=========================================================
+ 🔗 FASE 4: A Grande Conexão
+=========================================================
+Avisando o Prowlarr para mandar os achados para o Radarr.
+
+1. Ainda no Radarr, vá em Settings > General.
+2. Copie o código gigante chamado "API Key".
+3. Volte para a aba do Prowlarr no seu navegador.
+4. Vá em Settings > Apps e clique no "+".
+5. Escolha o "Radarr" e preencha:
+   - Prowlarr Server: http://localhost:9696
+   - Radarr Server: http://localhost:7878
+   - API Key: (Cole aqui o código que copiou do Radarr)
+6. Clique em "Test" e depois em "Save".
+=========================================================
+FASE4
+read -p "👉 Pressione [ENTER] quando terminar a FASE 4..."
+clear
+
+cat << 'FASE5'
+=========================================================
+ 📝 FASE 5: As Legendas (Bazarr)
+=========================================================
+Por fim, o caçador de legendas automático(Pode pular este, é opcional e nem eu consegui fazer funcionar).
+O próprio plex tem um sistema de legendas, funciona bem.
+
+1. No Painel Web, clique em "Abrir Bazarr".
+2. Vá em Settings > Radarr.
+   - IP Address: localhost
+   - Port: 7878
+   - API Key: (Cole a mesma chave que usou na Fase 4)
+   - Test e Save.
+3. Vá em Settings > Languages.
+   - Adicione o "Portuguese (Brazil)".
+4. Vá em Settings > Providers.
+   - Clique no "+" e adicione o "OpenSubtitles".
+   - Coloque o seu login do OpenSubtitles, se tiver.
+
+=========================================================
+ 🎉 TUDO PRONTO! A SUA ACRÓPOLE ESTÁ 100% OPERACIONAL!
+=========================================================
+Sempre que quiser um filme, abra o Radarr no seu painel, 
+pesquise o nome e clique em "Add". 
+
+Ele vai buscar, baixar, puxar a legenda e o filme 
+aparecerá magicamente no seu Plex! 
+Aproveite o seu império! Você pode fechar este terminal.
+FASE5
